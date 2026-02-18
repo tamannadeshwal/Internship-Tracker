@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Faculty Dashboard – InternTrack</title>
+    <script>(function () { var t = localStorage.getItem('interntrack-theme') || 'dark'; document.documentElement.setAttribute('data-theme', t); })();</script>
+    <meta name="description"
+        content="Faculty admin dashboard to monitor student internships and resolve problem reports on InternTrack." />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .resolve-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .resolve-modal-overlay.open {
+            display: flex;
+        }
+
+        .resolve-modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: var(--shadow-lg);
+            animation: fadeInUp 0.3s ease forwards;
+        }
+
+        .resolve-modal h3 {
+            margin-bottom: 8px;
+        }
+
+        .resolve-modal p {
+            font-size: 0.88rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .faculty-info-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            border-radius: 999px;
+            padding: 4px 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .dept-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--accent-light);
+        }
+
+        .action-btn-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .summary-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .summary-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 10px 16px;
+            font-size: 0.85rem;
+        }
+
+        .summary-chip .chip-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Resolve Modal -->
+    <div class="resolve-modal-overlay" id="resolveModal">
+        <div class="resolve-modal">
+            <h3>Resolve Problem Report</h3>
+            <p>Provide a resolution note for the student. This will mark the issue as resolved.</p>
+            <div class="form-group">
+                <label class="form-label" for="resolutionNote">Resolution Note <span class="required">*</span></label>
+                <textarea id="resolutionNote" class="form-control" rows="4"
+                    placeholder="Describe the action taken to resolve this issue…"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="resolutionStatus">Update Status</label>
+                <select id="resolutionStatus" class="form-control">
+                    <option value="resolved">Resolved</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="escalated">Escalated</option>
+                    <option value="closed">Closed (No Action)</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-success" onclick="submitResolution()">✅ Submit Resolution</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div class="brand-icon">🎓</div>
+            InternTrack
+            <span class="faculty-info-tag">👨‍🏫 Faculty View</span>
+        </div>
+        <div class="navbar-links">
+            <button class="theme-toggle-btn" title="Toggle Theme">☀️</button>
+            <a href="login.html" class="btn btn-secondary btn-sm">Logout</a>
+        </div>
+    </nav>
+
+    <div class="page-wrapper">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-user">
+                    <div class="sidebar-avatar" style="background: linear-gradient(135deg, #22c55e, #16a34a);">PK</div>
+                    <div class="sidebar-user-info">
+                        <div class="name">Prof. Priya Kumar</div>
+                        <div class="role">Faculty Advisor · CSE Dept.</div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-section-label">Overview</div>
+                <a href="faculty-dashboard.html" class="sidebar-link active">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+
+                <div class="sidebar-section-label">Management</div>
+                <a href="#" class="sidebar-link" onclick="switchTab('students')">
+                    <span class="icon">🎓</span> All Students
+                </a>
+                <a href="#" class="sidebar-link" onclick="switchTab('internships')">
+                    <span class="icon">📋</span> Internship Records
+                </a>
+                <a href="#" class="sidebar-link" onclick="switchTab('problems')">
+                    <span class="icon">⚠️</span> Problem Reports
+                    <span class="badge badge-danger"
+                        style="margin-left:auto; font-size:0.7rem; padding:2px 7px;">3</span>
+                </a>
+
+                <div class="sidebar-section-label">Account</div>
+                <a href="#" class="sidebar-link">
+                    <span class="icon">⚙️</span> Settings
+                </a>
+                <a href="login.html" class="sidebar-link">
+                    <span class="icon">🚪</span> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <div class="page-header">
+                <div class="page-header-row">
+                    <div>
+                        <h2>Faculty Dashboard</h2>
+                        <p>Monitor all student internships and manage problem reports.</p>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <span style="font-size:0.82rem; color:var(--text-muted);">Last updated: Today, 12:40 PM</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon purple">🎓</div>
+                    <div>
+                        <div class="stat-value">48</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue">📋</div>
+                    <div>
+                        <div class="stat-value">124</div>
+                        <div class="stat-label">Internship Records</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">✅</div>
+                    <div>
+                        <div class="stat-value">89</div>
+                        <div class="stat-label">Completed Internships</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon amber">⏳</div>
+                    <div>
+                        <div class="stat-value">35</div>
+                        <div class="stat-label">Ongoing Internships</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red">🚨</div>
+                    <div>
+                        <div class="stat-value">3</div>
+                        <div class="stat-label">Pending Problems</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" id="tab-students" onclick="switchTab('students')">🎓 Students</button>
+                <button class="tab-btn" id="tab-internships" onclick="switchTab('internships')">📋 Internship
+                    Records</button>
+                <button class="tab-btn" id="tab-problems" onclick="switchTab('problems')">⚠️ Problem Reports</button>
+            </div>
+
+            <!-- Students Tab -->
+            <div id="content-students" class="tab-content active">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">All Students</h4>
+                        <span class="badge badge-info">48 Students</span>
+                    </div>
+                    <div class="filter-bar">
+                        <div class="search-input-wrap" style="flex:1;">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="tableSearch" class="form-control"
+                                placeholder="Search by name, ID, department…" />
+                        </div>
+                        <select class="form-control" style="width:auto;">
+                            <option value="">All Departments</option>
+                            <option>CSE</option>
+                            <option>ECE</option>
+                            <option>ME</option>
+                            <option>IT</option>
+                        </select>
+                        <select class="form-control" style="width:auto;">
+                            <option value="">All Years</option>
+                            <option>1st Year</option>
+                            <option>2nd Year</option>
+                            <option>3rd Year</option>
+                            <option>4th Year</option>
+                        </select>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Year</th>
+                                    <th>Internships</th>
+                                    <th>Hours</th>
+                                    <th>Credits</th>
+                                    <th>Open Issues</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>CS2021001</strong></td>
+                                    <td>Rahul Sharma</td>
+                                    <td><span class="dept-tag">CSE</span></td>
+                                    <td>3rd Year</td>
+                                    <td>3</td>
+                                    <td>480 hrs</td>
+                                    <td><span style="color:var(--accent-light); font-weight:700;">6</span></td>
+                                    <td><span class="badge badge-warning">1</span></td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-outline btn-sm">Records</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CS2021002</strong></td>
+                                    <td>Priya Patel</td>
+                                    <td><span class="dept-tag">CSE</span></td>
+                                    <td>3rd Year</td>
+                                    <td>2</td>
+                                    <td>320 hrs</td>
+                                    <td><span style="color:var(--accent-light); font-weight:700;">4</span></td>
+                                    <td><span class="badge badge-success">0</span></td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-outline btn-sm">Records</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>EC2022015</strong></td>
+                                    <td>Arjun Mehta</td>
+                                    <td><span class="dept-tag"
+                                            style="background:rgba(34,197,94,0.12);color:#4ade80;">ECE</span></td>
+                                    <td>2nd Year</td>
+                                    <td>1</td>
+                                    <td>160 hrs</td>
+                                    <td><span style="color:var(--accent-light); font-weight:700;">2</span></td>
+                                    <td><span class="badge badge-danger">2</span></td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-outline btn-sm">Records</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>ME2020008</strong></td>
+                                    <td>Sneha Reddy</td>
+                                    <td><span class="dept-tag"
+                                            style="background:rgba(245,158,11,0.12);color:#fbbf24;">ME</span></td>
+                                    <td>4th Year</td>
+                                    <td>4</td>
+                                    <td>640 hrs</td>
+                                    <td><span style="color:var(--accent-light); font-weight:700;">8</span></td>
+                                    <td><span class="badge badge-success">0</span></td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-outline btn-sm">Records</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>IT2023022</strong></td>
+                                    <td>Karan Singh</td>
+                                    <td><span class="dept-tag"
+                                            style="background:rgba(56,189,248,0.12);color:#38bdf8;">IT</span></td>
+                                    <td>1st Year</td>
+                                    <td>0</td>
+                                    <td>0 hrs</td>
+                                    <td><span style="color:var(--text-muted); font-weight:700;">0</span></td>
+                                    <td><span class="badge badge-success">0</span></td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-outline btn-sm">Records</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Internship Records Tab -->
+            <div id="content-internships" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">All Internship Records</h4>
+                        <span class="badge badge-info">124 Records</span>
+                    </div>
+                    <div class="filter-bar">
+                        <div class="search-input-wrap" style="flex:1;">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" class="form-control" placeholder="Search by student, company, type…"
+                                oninput="filterTable(this, 'internTable')" />
+                        </div>
+                        <select class="form-control" style="width:auto;"
+                            onchange="filterTableByCol(this.value, 'internTable', 5)">
+                            <option value="">All Status</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Ongoing">Ongoing</option>
+                            <option value="Pending">Pending</option>
+                        </select>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="internTable">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Student ID</th>
+                                    <th>Company</th>
+                                    <th>Type</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                    <th>Hours/Wk</th>
+                                    <th>Credits</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Rahul Sharma</strong></td>
+                                    <td>CS2021001</td>
+                                    <td>Infosys Ltd.</td>
+                                    <td>Technical</td>
+                                    <td>Jun–Aug 2024</td>
+                                    <td><span class="badge badge-success">Completed</span></td>
+                                    <td>40</td>
+                                    <td>
+                                        <select class="form-control"
+                                            style="width:80px; padding:4px 8px; font-size:0.8rem;">
+                                            <option>3</option>
+                                            <option>4</option>
+                                            <option>5</option>
+                                            <option>2</option>
+                                            <option>1</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-success btn-sm">Approve</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Priya Patel</strong></td>
+                                    <td>CS2021002</td>
+                                    <td>TCS Innovation</td>
+                                    <td>Technical</td>
+                                    <td>May–Jul 2024</td>
+                                    <td><span class="badge badge-success">Completed</span></td>
+                                    <td>38</td>
+                                    <td>
+                                        <select class="form-control"
+                                            style="width:80px; padding:4px 8px; font-size:0.8rem;">
+                                            <option>2</option>
+                                            <option>3</option>
+                                            <option>4</option>
+                                            <option>1</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-success btn-sm">Approve</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Arjun Mehta</strong></td>
+                                    <td>EC2022015</td>
+                                    <td>BHEL</td>
+                                    <td>Industrial</td>
+                                    <td>Jan 2025–Present</td>
+                                    <td><span class="badge badge-warning">Ongoing</span></td>
+                                    <td>45</td>
+                                    <td><span class="badge badge-muted">Pending</span></td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Sneha Reddy</strong></td>
+                                    <td>ME2020008</td>
+                                    <td>Tata Motors</td>
+                                    <td>Industrial</td>
+                                    <td>Jun–Sep 2024</td>
+                                    <td><span class="badge badge-success">Completed</span></td>
+                                    <td>48</td>
+                                    <td>
+                                        <select class="form-control"
+                                            style="width:80px; padding:4px 8px; font-size:0.8rem;">
+                                            <option>4</option>
+                                            <option>3</option>
+                                            <option>5</option>
+                                            <option>2</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-success btn-sm">Approve</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Problems Tab -->
+            <div id="content-problems" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Problem Reports</h4>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <span class="badge badge-danger">3 Pending</span>
+                            <span class="badge badge-success">12 Resolved</span>
+                        </div>
+                    </div>
+                    <div class="filter-bar">
+                        <div class="search-input-wrap" style="flex:1;">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" class="form-control" placeholder="Search problems…"
+                                oninput="filterTable(this, 'problemTable')" />
+                        </div>
+                        <select class="form-control" style="width:auto;">
+                            <option value="">All Priority</option>
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                            <option>Critical</option>
+                        </select>
+                        <select class="form-control" style="width:auto;">
+                            <option value="">All Status</option>
+                            <option>Pending</option>
+                            <option>Under Review</option>
+                            <option>Resolved</option>
+                        </select>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="problemTable">
+                            <thead>
+                                <tr>
+                                    <th>Report ID</th>
+                                    <th>Student</th>
+                                    <th>Company</th>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th>Priority</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>PR-001</strong></td>
+                                    <td>Rahul Sharma</td>
+                                    <td>Tata Motors</td>
+                                    <td>Supervisor not providing feedback</td>
+                                    <td>Supervisor Issue</td>
+                                    <td><span class="badge badge-warning">Medium</span></td>
+                                    <td>15 Feb 2025</td>
+                                    <td><span class="badge badge-info">Under Review</span></td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-success btn-sm"
+                                                onclick="openModal('PR-001')">Resolve</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>PR-003</strong></td>
+                                    <td>Arjun Mehta</td>
+                                    <td>BHEL</td>
+                                    <td>Unpaid stipend for 2 months</td>
+                                    <td>Unpaid Stipend</td>
+                                    <td><span class="badge badge-danger">High</span></td>
+                                    <td>10 Feb 2025</td>
+                                    <td><span class="badge badge-warning">Pending</span></td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-success btn-sm"
+                                                onclick="openModal('PR-003')">Resolve</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>PR-004</strong></td>
+                                    <td>Arjun Mehta</td>
+                                    <td>BHEL</td>
+                                    <td>Safety equipment not provided</td>
+                                    <td>Safety Concern</td>
+                                    <td><span class="badge badge-danger"
+                                            style="background:rgba(220,38,38,0.15);color:#f87171;">Critical</span></td>
+                                    <td>12 Feb 2025</td>
+                                    <td><span class="badge badge-warning">Pending</span></td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-success btn-sm"
+                                                onclick="openModal('PR-004')">Resolve</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>PR-002</strong></td>
+                                    <td>Rahul Sharma</td>
+                                    <td>DRDO Research Lab</td>
+                                    <td>Certificate not issued after completion</td>
+                                    <td>Documentation</td>
+                                    <td><span class="badge badge-danger">High</span></td>
+                                    <td>10 Mar 2024</td>
+                                    <td><span class="badge badge-success">Resolved</span></td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/theme.js"></script>
+    <script src="js/validation.js"></script>
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('content-' + tab).classList.add('active');
+        }
+
+        function openModal(reportId) {
+            document.getElementById('resolveModal').classList.add('open');
+            document.getElementById('resolveModal').dataset.reportId = reportId;
+        }
+
+        function closeModal() {
+            document.getElementById('resolveModal').classList.remove('open');
+        }
+
+        function submitResolution() {
+            const note = document.getElementById('resolutionNote').value.trim();
+            if (!note) {
+                alert('Please enter a resolution note before submitting.');
+                return;
+            }
+            closeModal();
+            alert('✅ Problem report resolved successfully! The student has been notified.');
+        }
+
+        function filterTable(input, tableId) {
+            const q = input.value.toLowerCase();
+            document.querySelectorAll('#' + tableId + ' tbody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
+
+        // Close modal on overlay click
+        document.getElementById('resolveModal').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+</body>
+
+</html>

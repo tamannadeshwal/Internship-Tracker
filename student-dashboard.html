@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Dashboard – InternTrack</title>
+    <script>(function () { var t = localStorage.getItem('interntrack-theme') || 'dark'; document.documentElement.setAttribute('data-theme', t); })();</script>
+    <meta name="description"
+        content="View your internship records, problem reports, and credits on your InternTrack student dashboard." />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        .credit-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(167, 139, 250, 0.2));
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            border-radius: 999px;
+            padding: 4px 12px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--accent-light);
+        }
+
+        .internship-type-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--info);
+        }
+
+        .action-btn-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(167, 139, 250, 0.1));
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: var(--radius-lg);
+            padding: 24px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .welcome-text h3 {
+            margin-bottom: 4px;
+        }
+
+        .welcome-text p {
+            font-size: 0.88rem;
+        }
+
+        .profile-completion {
+            min-width: 200px;
+        }
+
+        .profile-completion .label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div class="brand-icon">🎓</div>
+            InternTrack
+        </div>
+        <div class="navbar-links">
+            <button class="theme-toggle-btn" title="Toggle Theme">☀️</button>
+            <a href="internship-form.html" class="btn btn-primary btn-sm">+ Add Internship</a>
+            <a href="login.html" class="btn btn-secondary btn-sm">Logout</a>
+        </div>
+    </nav>
+
+    <div class="page-wrapper">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-user">
+                    <div class="sidebar-avatar">RS</div>
+                    <div class="sidebar-user-info">
+                        <div class="name">Rahul Sharma</div>
+                        <div class="role">CS2021001 · CSE · 3rd Year</div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-section-label">Main</div>
+                <a href="student-dashboard.html" class="sidebar-link active">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+                <a href="internship-form.html" class="sidebar-link">
+                    <span class="icon">➕</span> Add Internship
+                </a>
+                <a href="problem-report.html" class="sidebar-link">
+                    <span class="icon">🐛</span> Report Problem
+                </a>
+                <a href="certificate-upload.html" class="sidebar-link">
+                    <span class="icon">📄</span> Upload Certificate
+                </a>
+
+                <div class="sidebar-section-label">Records</div>
+                <a href="#internships" class="sidebar-link" onclick="switchTab('internships')">
+                    <span class="icon">📋</span> My Internships
+                </a>
+                <a href="#problems" class="sidebar-link" onclick="switchTab('problems')">
+                    <span class="icon">⚠️</span> My Problems
+                </a>
+
+                <div class="sidebar-section-label">Account</div>
+                <a href="#" class="sidebar-link">
+                    <span class="icon">👤</span> Profile
+                </a>
+                <a href="login.html" class="sidebar-link">
+                    <span class="icon">🚪</span> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Welcome Banner -->
+            <div class="welcome-banner">
+                <div class="welcome-text">
+                    <h3>Welcome back, Rahul! 👋</h3>
+                    <p>You have <strong style="color:var(--warning);">1 open problem report</strong> and <strong
+                            style="color:var(--success);">2 completed internships</strong>.</p>
+                </div>
+                <div class="profile-completion">
+                    <div class="label">
+                        <span>Profile Completion</span>
+                        <span style="color:var(--accent-light);">75%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width:75%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon purple">📋</div>
+                    <div>
+                        <div class="stat-value">3</div>
+                        <div class="stat-label">Total Internships</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">✅</div>
+                    <div>
+                        <div class="stat-value">2</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue">⏱️</div>
+                    <div>
+                        <div class="stat-value">480</div>
+                        <div class="stat-label">Total Hours Logged</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon amber">⭐</div>
+                    <div>
+                        <div class="stat-value">6</div>
+                        <div class="stat-label">Extra Credits Earned</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red">⚠️</div>
+                    <div>
+                        <div class="stat-value">1</div>
+                        <div class="stat-label">Open Issues</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" id="tab-internships" onclick="switchTab('internships')">📋 My
+                    Internships</button>
+                <button class="tab-btn" id="tab-problems" onclick="switchTab('problems')">⚠️ Problem Reports</button>
+            </div>
+
+            <!-- Internships Tab -->
+            <div id="content-internships" class="tab-content active">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Internship Records</h4>
+                        <a href="internship-form.html" class="btn btn-primary btn-sm">+ Add New</a>
+                    </div>
+
+                    <div class="filter-bar">
+                        <div class="search-input-wrap">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="tableSearch" class="form-control"
+                                placeholder="Search internships…" />
+                        </div>
+                        <select class="form-control" style="width:auto;" onchange="filterByStatus(this.value)">
+                            <option value="">All Status</option>
+                            <option value="completed">Completed</option>
+                            <option value="ongoing">Ongoing</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Company</th>
+                                    <th>Type</th>
+                                    <th>Duration</th>
+                                    <th>Hours/Week</th>
+                                    <th>Status</th>
+                                    <th>Credits</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td><strong>Infosys Ltd.</strong></td>
+                                    <td><span class="internship-type-tag">Technical</span></td>
+                                    <td>Jun 2024 – Aug 2024</td>
+                                    <td>40 hrs</td>
+                                    <td><span class="badge badge-success">Completed</span></td>
+                                    <td><span class="credit-badge">⭐ 3 Credits</span></td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-outline btn-sm">Edit</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td><strong>DRDO Research Lab</strong></td>
+                                    <td><span class="internship-type-tag"
+                                            style="background:rgba(167,139,250,0.12);color:#a78bfa;">Research</span>
+                                    </td>
+                                    <td>Dec 2023 – Feb 2024</td>
+                                    <td>35 hrs</td>
+                                    <td><span class="badge badge-success">Completed</span></td>
+                                    <td><span class="credit-badge">⭐ 3 Credits</span></td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-outline btn-sm">Edit</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td><strong>Tata Motors</strong></td>
+                                    <td><span class="internship-type-tag"
+                                            style="background:rgba(245,158,11,0.12);color:#fbbf24;">Industrial</span>
+                                    </td>
+                                    <td>Jan 2025 – Present</td>
+                                    <td>45 hrs</td>
+                                    <td><span class="badge badge-warning">Ongoing</span></td>
+                                    <td><span class="badge badge-muted">Pending</span></td>
+                                    <td>
+                                        <div class="action-btn-group">
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-outline btn-sm">Edit</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Problems Tab -->
+            <div id="content-problems" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Problem Reports</h4>
+                        <a href="problem-report.html" class="btn btn-danger btn-sm">+ Report Issue</a>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Title</th>
+                                    <th>Company</th>
+                                    <th>Category</th>
+                                    <th>Priority</th>
+                                    <th>Submitted</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>PR-001</td>
+                                    <td><strong>Supervisor not providing feedback</strong></td>
+                                    <td>Tata Motors</td>
+                                    <td>Supervisor Issue</td>
+                                    <td><span class="badge badge-warning">Medium</span></td>
+                                    <td>15 Feb 2025</td>
+                                    <td><span class="badge badge-info">Under Review</span></td>
+                                    <td><button class="btn btn-secondary btn-sm">View</button></td>
+                                </tr>
+                                <tr>
+                                    <td>PR-002</td>
+                                    <td><strong>Certificate not issued after completion</strong></td>
+                                    <td>DRDO Research Lab</td>
+                                    <td>Documentation</td>
+                                    <td><span class="badge badge-danger">High</span></td>
+                                    <td>10 Mar 2024</td>
+                                    <td><span class="badge badge-success">Resolved</span></td>
+                                    <td><button class="btn btn-secondary btn-sm">View</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/theme.js"></script>
+    <script src="js/validation.js"></script>
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('content-' + tab).classList.add('active');
+        }
+
+        function filterByStatus(status) {
+            const rows = document.querySelectorAll('#dataTable tbody tr');
+            rows.forEach(row => {
+                if (!status) { row.style.display = ''; return; }
+                row.style.display = row.textContent.toLowerCase().includes(status) ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+
+</html>

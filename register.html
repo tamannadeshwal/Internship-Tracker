@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register – InternTrack</title>
+    <script>(function () { var t = localStorage.getItem('interntrack-theme') || 'dark'; document.documentElement.setAttribute('data-theme', t); })();</script>
+    <meta name="description" content="Create your InternTrack student account to start managing your internships." />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .auth-left {
+            flex: 1;
+            background: linear-gradient(135deg, #0d0f1a 0%, #131627 50%, #1a1e35 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
+            border-right: 1px solid var(--border);
+        }
+
+        .auth-left::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, transparent 65%);
+            top: -100px;
+            right: -100px;
+            pointer-events: none;
+        }
+
+        .auth-left-content {
+            position: relative;
+            z-index: 1;
+            max-width: 420px;
+        }
+
+        .auth-left h1 {
+            margin-bottom: 16px;
+            font-size: 2.2rem;
+        }
+
+        .auth-left p {
+            margin-bottom: 36px;
+            font-size: 0.95rem;
+        }
+
+        .auth-feature-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .auth-feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .auth-feature-list li .check {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(34, 197, 94, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: var(--success);
+            flex-shrink: 0;
+        }
+
+        .auth-right {
+            width: 520px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 32px;
+            overflow-y: auto;
+        }
+
+        .auth-form-card {
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .auth-form-card .auth-logo {
+            margin-bottom: 28px;
+        }
+
+        .auth-form-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+
+        .auth-form-card .auth-subtitle {
+            margin-bottom: 28px;
+        }
+
+        @media (max-width: 900px) {
+            .auth-left {
+                display: none;
+            }
+
+            .auth-right {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-wrapper">
+
+        <!-- Left Panel -->
+        <div class="auth-left">
+            <div class="auth-left-content">
+                <div class="auth-logo">
+                    <div class="auth-logo-icon">🎓</div>
+                    <div class="auth-logo-text">
+                        InternTrack
+                        <span>University Internship Platform</span>
+                    </div>
+                </div>
+                <h1>Start Your <span class="gradient-text">Internship Journey</span></h1>
+                <p>Join thousands of students who manage their internship records and problem reports digitally.</p>
+                <ul class="auth-feature-list">
+                    <li><span class="check">✓</span> Track all your internship records in one place</li>
+                    <li><span class="check">✓</span> Report and monitor internship problems easily</li>
+                    <li><span class="check">✓</span> Get extra credits for completed internships</li>
+                    <li><span class="check">✓</span> Share your internship profile with recruiters</li>
+                    <li><span class="check">✓</span> Communicate directly with faculty advisors</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="auth-right">
+            <div style="position:absolute; top:16px; right:16px;">
+                <button class="theme-toggle-btn" title="Toggle Theme">☀️</button>
+            </div>
+            <div class="auth-form-card">
+                <div class="auth-logo">
+                    <div class="auth-logo-icon">🎓</div>
+                    <div class="auth-logo-text">
+                        InternTrack
+                        <span>University Internship Platform</span>
+                    </div>
+                </div>
+                <h2>Create Account</h2>
+                <p class="auth-subtitle">Fill in your details to register as a student.</p>
+
+                <div id="formAlert" class="alert"></div>
+
+                <form id="registrationForm" novalidate>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="fullName">Full Name <span class="required">*</span></label>
+                            <input type="text" id="fullName" name="fullName" class="form-control"
+                                placeholder="e.g. Rahul Sharma" autocomplete="name" />
+                            <span class="error-msg"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="studentId">Student ID <span class="required">*</span></label>
+                            <input type="text" id="studentId" name="studentId" class="form-control"
+                                placeholder="e.g. CS2021001" autocomplete="off" />
+                            <span class="error-msg"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address <span class="required">*</span></label>
+                        <input type="email" id="email" name="email" class="form-control"
+                            placeholder="you@university.edu" autocomplete="email" />
+                        <span class="error-msg"></span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="department">Department <span
+                                    class="required">*</span></label>
+                            <select id="department" name="department" class="form-control">
+                                <option value="">Select Department</option>
+                                <option value="CSE">Computer Science & Engg.</option>
+                                <option value="ECE">Electronics & Comm. Engg.</option>
+                                <option value="ME">Mechanical Engineering</option>
+                                <option value="CE">Civil Engineering</option>
+                                <option value="EEE">Electrical & Electronics</option>
+                                <option value="IT">Information Technology</option>
+                                <option value="MBA">Business Administration</option>
+                                <option value="OTHER">Other</option>
+                            </select>
+                            <span class="error-msg"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="yearOfStudy">Year of Study <span
+                                    class="required">*</span></label>
+                            <select id="yearOfStudy" name="yearOfStudy" class="form-control">
+                                <option value="">Select Year</option>
+                                <option value="1">1st Year</option>
+                                <option value="2">2nd Year</option>
+                                <option value="3">3rd Year</option>
+                                <option value="4">4th Year</option>
+                                <option value="PG1">PG – 1st Year</option>
+                                <option value="PG2">PG – 2nd Year</option>
+                            </select>
+                            <span class="error-msg"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password <span class="required">*</span></label>
+                        <div class="input-group">
+                            <input type="password" id="password" name="password" class="form-control"
+                                placeholder="Minimum 8 characters" autocomplete="new-password" />
+                            <button type="button" class="input-toggle-btn" data-target="#password">👁️</button>
+                        </div>
+                        <span class="error-msg"></span>
+                        <span class="form-hint">Use at least 8 characters with letters and numbers.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="confirmPassword">Confirm Password <span
+                                class="required">*</span></label>
+                        <div class="input-group">
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control"
+                                placeholder="Re-enter your password" autocomplete="new-password" />
+                            <button type="button" class="input-toggle-btn" data-target="#confirmPassword">👁️</button>
+                        </div>
+                        <span class="error-msg"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full mt-8">Create Account →</button>
+
+                </form>
+
+                <div class="auth-footer">
+                    Already have an account? <a href="login.html">Sign in here</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="js/theme.js"></script>
+    <script src="js/validation.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Internship – InternTrack</title>
+    <script>(function () { var t = localStorage.getItem('interntrack-theme') || 'dark'; document.documentElement.setAttribute('data-theme', t); })();</script>
+    <meta name="description"
+        content="Submit your internship details to InternTrack for faculty review and credit approval." />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        .form-page-wrapper {
+            min-height: 100vh;
+            background: var(--bg-primary);
+        }
+
+        .form-page-inner {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 88px 24px 48px;
+        }
+
+        .form-progress {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 36px;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .progress-step .step-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .progress-step.active .step-dot {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .progress-step.done .step-dot {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .progress-line {
+            flex: 1;
+            height: 2px;
+            background: var(--border);
+            margin: 0 8px;
+        }
+
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 28px 0 20px;
+        }
+
+        .section-divider span {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent-light);
+            white-space: nowrap;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div class="brand-icon">🎓</div>
+            InternTrack
+        </div>
+        <div class="navbar-links">
+            <button class="theme-toggle-btn" title="Toggle Theme">☀️</button>
+            <a href="student-dashboard.html">Dashboard</a>
+            <a href="login.html" class="btn btn-secondary btn-sm">Logout</a>
+        </div>
+    </nav>
+
+    <div class="form-page-wrapper">
+        <div class="form-page-inner">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <a href="student-dashboard.html"
+                    style="font-size:0.85rem; color:var(--text-muted); display:inline-flex; align-items:center; gap:4px; margin-bottom:12px;">←
+                    Back to Dashboard</a>
+                <h2>Add Internship Record</h2>
+                <p>Fill in your internship details accurately. All fields marked with * are required.</p>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="form-progress">
+                <div class="progress-step active">
+                    <div class="step-dot">1</div>
+                    <span>Basic Info</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-dot">2</div>
+                    <span>Supervisor</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-dot">3</div>
+                    <span>Documents</span>
+                </div>
+            </div>
+
+            <div id="formAlert" class="alert"></div>
+
+            <div class="card">
+                <form id="internshipForm" novalidate>
+
+                    <!-- Section 1: Basic Information -->
+                    <div class="section-divider"><span>🏢 Company & Internship Details</span></div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="companyName">Company Name <span
+                                    class="required">*</span></label>
+                            <input type="text" id="companyName" name="companyName" class="form-control"
+                                placeholder="e.g. Infosys Ltd." />
+                            <span class="error-msg"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="internshipType">Internship Type <span
+                                    class="required">*</span></label>
+                            <select id="internshipType" name="internshipType" class="form-control">
+                                <option value="">Select Type</option>
+                                <option value="technical">Technical / Software</option>
+                                <option value="research">Research</option>
+                                <option value="industrial">Industrial / Manufacturing</option>
+                                <option value="management">Management / Business</option>
+                                <option value="design">Design / Creative</option>
+                                <option value="marketing">Marketing / Sales</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <span class="error-msg"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="startDate">Start Date <span class="required">*</span></label>
+                            <input type="date" id="startDate" name="startDate" class="form-control" />
+                            <span class="error-msg"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="endDate">End Date <span class="required">*</span></label>
+                            <input type="date" id="endDate" name="endDate" class="form-control" />
+                            <span class="error-msg"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="weeklyHours">Working Hours / Week <span
+                                    class="required">*</span></label>
+                            <input type="number" id="weeklyHours" name="weeklyHours" class="form-control"
+                                placeholder="e.g. 40" min="1" max="80" />
+                            <span class="error-msg"></span>
+                            <span class="form-hint">Enter hours per week (1–80).</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="status">Internship Status <span
+                                    class="required">*</span></label>
+                            <select id="status" name="status" class="form-control">
+                                <option value="">Select Status</option>
+                                <option value="ongoing">Ongoing</option>
+                                <option value="completed">Completed</option>
+                                <option value="pending_approval">Pending Approval</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                            <span class="error-msg"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="description">Internship Description <span
+                                class="required">*</span></label>
+                        <textarea id="description" name="description" class="form-control" rows="4"
+                            placeholder="Briefly describe your internship role, responsibilities, and technologies/tools used…"></textarea>
+                        <span class="error-msg"></span>
+                        <span class="form-hint">Minimum 20 characters.</span>
+                    </div>
+
+                    <!-- Section 2: Supervisor Details -->
+                    <div class="section-divider"><span>👤 Supervisor Information</span></div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="supervisorName">Supervisor Name <span
+                                    class="required">*</span></label>
+                            <input type="text" id="supervisorName" name="supervisorName" class="form-control"
+                                placeholder="e.g. Mr. Anil Kumar" />
+                            <span class="error-msg"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="supervisorEmail">Supervisor Email <span
+                                    class="required">*</span></label>
+                            <input type="email" id="supervisorEmail" name="supervisorEmail" class="form-control"
+                                placeholder="supervisor@company.com" />
+                            <span class="error-msg"></span>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Documents -->
+                    <div class="section-divider"><span>📁 Documents & Certificate</span></div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="certificate">Internship Certificate</label>
+                        <div class="file-upload-area">
+                            <input type="file" id="certificate" name="certificate" accept=".pdf,.jpg,.jpeg,.png" />
+                            <div class="file-upload-icon">📄</div>
+                            <div class="file-upload-text">Click to upload or drag & drop</div>
+                            <div class="file-upload-hint">PDF, JPG, PNG – Max 5MB</div>
+                        </div>
+                        <span class="form-hint">Upload your internship completion certificate (optional but
+                            recommended).</span>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <a href="student-dashboard.html" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Submit Internship Record →</button>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/theme.js"></script>
+    <script src="js/validation.js"></script>
+</body>
+
+</html>

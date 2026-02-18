@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login – InternTrack</title>
+    <script>(function () { var t = localStorage.getItem('interntrack-theme') || 'dark'; document.documentElement.setAttribute('data-theme', t); })();</script>
+    <meta name="description" content="Sign in to InternTrack to manage your internship records and problem reports." />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: var(--bg-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-wrapper::before {
+            content: '';
+            position: absolute;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 65%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .login-wrapper::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(167, 139, 250, 0.08) 0%, transparent 65%);
+            bottom: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 44px 40px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 600px) {
+            .login-card {
+                padding: 28px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-wrapper">
+        <div class="login-card">
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px;">
+                <a href="index.html" class="back-link" style="margin-bottom:0;">← Back to Home</a>
+                <button class="theme-toggle-btn" title="Toggle Theme">☀️</button>
+            </div>
+
+            <div class="auth-logo">
+                <div class="auth-logo-icon">🎓</div>
+                <div class="auth-logo-text">
+                    InternTrack
+                    <span>University Internship Platform</span>
+                </div>
+            </div>
+
+            <h2 class="auth-title">Welcome Back</h2>
+            <p class="auth-subtitle">Sign in to your account to continue.</p>
+
+            <!-- Role Toggle -->
+            <div class="role-toggle">
+                <input type="radio" id="roleStudent" name="role" value="student" checked />
+                <label for="roleStudent">🎓 Student</label>
+                <input type="radio" id="roleFaculty" name="role" value="faculty" />
+                <label for="roleFaculty">👨‍🏫 Faculty / Admin</label>
+            </div>
+
+            <div id="formAlert" class="alert"></div>
+
+            <form id="loginForm" novalidate>
+
+                <!-- Hidden role field for backend -->
+                <input type="hidden" name="role" id="roleValue" value="student" />
+
+                <div class="form-group">
+                    <label class="form-label" for="identifier">Email or Student ID <span
+                            class="required">*</span></label>
+                    <input type="text" id="identifier" name="identifier" class="form-control"
+                        placeholder="you@university.edu or CS2021001" autocomplete="username" />
+                    <span class="error-msg"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">
+                        Password <span class="required">*</span>
+                        <a href="#" style="float:right; font-size:0.78rem; font-weight:400;">Forgot password?</a>
+                    </label>
+                    <div class="input-group">
+                        <input type="password" id="password" name="password" class="form-control"
+                            placeholder="Enter your password" autocomplete="current-password" />
+                        <button type="button" class="input-toggle-btn" data-target="#password">👁️</button>
+                    </div>
+                    <span class="error-msg"></span>
+                </div>
+
+                <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="rememberMe" name="rememberMe"
+                        style="accent-color: var(--accent); width:16px; height:16px; cursor:pointer;" />
+                    <label for="rememberMe"
+                        style="font-size:0.85rem; color:var(--text-secondary); cursor:pointer; margin:0;">Remember me
+                        for 30 days</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full mt-8">Sign In →</button>
+
+            </form>
+
+            <div class="auth-divider">or</div>
+
+            <div class="auth-footer">
+                Don't have an account? <a href="register.html">Register here</a>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/theme.js"></script>
+    <script src="js/validation.js"></script>
+    <script>
+        // Sync role radio to hidden input
+        document.querySelectorAll('input[name="role"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                document.getElementById('roleValue').value = radio.value;
+            });
+        });
+    </script>
+</body>
+
+</html>

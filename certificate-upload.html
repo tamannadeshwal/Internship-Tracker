@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload Certificate – InternTrack</title>
+    <meta name="description"
+        content="Upload your internship completion certificate to InternTrack for faculty verification." />
+    <!-- Apply theme before render to avoid flash -->
+    <script>
+        (function () {
+            var t = localStorage.getItem('interntrack-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        .form-page-wrapper {
+            min-height: 100vh;
+            background: var(--bg-primary);
+        }
+
+        .form-page-inner {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 88px 24px 48px;
+        }
+
+        /* ── Upload Zone ── */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-xl);
+            padding: 56px 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            background: var(--bg-input);
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .upload-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .upload-zone-icon {
+            font-size: 3.5rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .upload-zone h3 {
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .upload-zone p {
+            font-size: 0.88rem;
+            margin-bottom: 16px;
+        }
+
+        .upload-zone .browse-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent-glow);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            border-radius: var(--radius-sm);
+            padding: 8px 18px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent-light);
+            pointer-events: none;
+        }
+
+        /* ── File Preview Card ── */
+        .file-preview {
+            display: none;
+            align-items: center;
+            gap: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin-top: 16px;
+        }
+
+        .file-preview.visible {
+            display: flex;
+        }
+
+        .file-preview-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-sm);
+            background: rgba(99, 102, 241, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .file-preview-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-preview-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-preview-size {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .file-remove-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 4px;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .file-remove-btn:hover {
+            transform: scale(1.2);
+        }
+
+        /* ── Upload Progress ── */
+        .upload-progress-wrap {
+            display: none;
+            margin-top: 16px;
+        }
+
+        .upload-progress-wrap.visible {
+            display: block;
+        }
+
+        .upload-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        /* ── Accepted Formats ── */
+        .format-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        .format-chip {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* ── Uploaded Certificates List ── */
+        .cert-list {
+            margin-top: 32px;
+        }
+
+        .cert-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            transition: var(--transition);
+        }
+
+        .cert-item:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .cert-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .cert-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .cert-item-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .cert-item-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .cert-item-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        /* ── Tips Box ── */
+        .tips-box {
+            background: rgba(56, 189, 248, 0.06);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin-bottom: 24px;
+        }
+
+        .tips-box h4 {
+            font-size: 0.88rem;
+            color: var(--info);
+            margin-bottom: 8px;
+        }
+
+        .tips-box ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .tips-box ul li {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .tips-box ul li::before {
+            content: '→';
+            color: var(--info);
+            flex-shrink: 0;
+        }
+
+        /* ── Section Divider ── */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 28px 0 20px;
+        }
+
+        .section-divider span {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent-light);
+            white-space: nowrap;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div class="brand-icon">🎓</div>
+            InternTrack
+        </div>
+        <div class="navbar-links">
+            <button class="theme-toggle-btn" title="Toggle Theme">☀️</button>
+            <a href="student-dashboard.html">Dashboard</a>
+            <a href="login.html" class="btn btn-secondary btn-sm">Logout</a>
+        </div>
+    </nav>
+
+    <div class="form-page-wrapper">
+        <div class="form-page-inner">
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <a href="student-dashboard.html"
+                    style="font-size:0.85rem; color:var(--text-muted); display:inline-flex; align-items:center; gap:4px; margin-bottom:12px;">←
+                    Back to Dashboard</a>
+                <h2>Upload Internship Certificate</h2>
+                <p>Upload your internship completion certificate for faculty verification and credit approval.</p>
+            </div>
+
+            <!-- Tips -->
+            <div class="tips-box">
+                <h4>📌 Before You Upload</h4>
+                <ul>
+                    <li>Ensure the certificate clearly shows your name, company name, and duration.</li>
+                    <li>Accepted formats: PDF, JPG, PNG, DOCX (max 10 MB per file).</li>
+                    <li>Scanned copies must be legible — blurry images may be rejected.</li>
+                    <li>You can upload multiple certificates for different internships.</li>
+                </ul>
+            </div>
+
+            <div id="formAlert" class="alert"></div>
+
+            <div class="card">
+                <form id="certUploadForm" novalidate>
+
+                    <!-- Internship Association -->
+                    <div class="section-divider"><span>🔗 Link to Internship</span></div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="linkedInternship">Select Internship <span
+                                    class="required">*</span></label>
+                            <select id="linkedInternship" name="linkedInternship" class="form-control">
+                                <option value="">Choose an internship record…</option>
+                                <option value="1">Infosys Ltd. (Jun–Aug 2024) – Technical</option>
+                                <option value="2">DRDO Research Lab (Dec 2023–Feb 2024) – Research</option>
+                                <option value="3">Tata Motors (Jan 2025–Present) – Industrial</option>
+                            </select>
+                            <span class="error-msg" id="linkedInternshipError"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="certType">Certificate Type <span
+                                    class="required">*</span></label>
+                            <select id="certType" name="certType" class="form-control">
+                                <option value="">Select type…</option>
+                                <option value="completion">Completion Certificate</option>
+                                <option value="appreciation">Appreciation Letter</option>
+                                <option value="offer_letter">Offer Letter</option>
+                                <option value="noc">No Objection Certificate (NOC)</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <span class="error-msg" id="certTypeError"></span>
+                        </div>
+                    </div>
+
+                    <!-- Upload Zone -->
+                    <div class="section-divider"><span>📄 Upload File</span></div>
+
+                    <div class="upload-zone" id="uploadZone">
+                        <input type="file" id="certificateFile" name="certificateFile"
+                            accept=".pdf,.jpg,.jpeg,.png,.docx" />
+                        <span class="upload-zone-icon">📤</span>
+                        <h3>Drag & Drop your certificate here</h3>
+                        <p>or click to browse from your device</p>
+                        <div class="browse-btn">📁 Browse Files</div>
+                        <div class="format-chips">
+                            <span class="format-chip">PDF</span>
+                            <span class="format-chip">JPG</span>
+                            <span class="format-chip">PNG</span>
+                            <span class="format-chip">DOCX</span>
+                            <span class="format-chip">Max 10 MB</span>
+                        </div>
+                    </div>
+
+                    <!-- File Preview -->
+                    <div class="file-preview" id="filePreview">
+                        <div class="file-preview-icon" id="previewIcon">📄</div>
+                        <div class="file-preview-info">
+                            <div class="file-preview-name" id="previewName">filename.pdf</div>
+                            <div class="file-preview-size" id="previewSize">0 KB</div>
+                        </div>
+                        <button type="button" class="file-remove-btn" id="removeFileBtn" title="Remove file">✕</button>
+                    </div>
+
+                    <!-- Upload Progress -->
+                    <div class="upload-progress-wrap" id="uploadProgressWrap">
+                        <div class="upload-progress-label">
+                            <span>Uploading…</span>
+                            <span id="progressPct">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width:0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Notes -->
+                    <div class="section-divider"><span>📝 Additional Notes</span></div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="certNotes">Notes (Optional)</label>
+                        <textarea id="certNotes" name="certNotes" class="form-control" rows="3"
+                            placeholder="Any additional information about this certificate (e.g. issued by HR department, digital copy, etc.)"></textarea>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <a href="student-dashboard.html" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary" id="uploadBtn">📤 Upload Certificate</button>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Previously Uploaded Certificates -->
+            <div class="cert-list">
+                <div class="section-divider"><span>📂 Previously Uploaded Certificates</span></div>
+
+                <div class="cert-item">
+                    <div class="cert-item-icon" style="background:rgba(239,68,68,0.12);">📕</div>
+                    <div class="cert-item-info">
+                        <div class="cert-item-name">Infosys_Completion_Certificate.pdf</div>
+                        <div class="cert-item-meta">Infosys Ltd. · Completion Certificate · Uploaded 20 Aug 2024 · 1.2
+                            MB</div>
+                    </div>
+                    <div class="cert-item-actions">
+                        <span class="badge badge-success">Verified ✓</span>
+                        <button class="btn btn-secondary btn-sm">View</button>
+                        <button class="btn btn-danger btn-sm">Delete</button>
+                    </div>
+                </div>
+
+                <div class="cert-item">
+                    <div class="cert-item-icon" style="background:rgba(56,189,248,0.12);">📘</div>
+                    <div class="cert-item-info">
+                        <div class="cert-item-name">DRDO_Appreciation_Letter.pdf</div>
+                        <div class="cert-item-meta">DRDO Research Lab · Appreciation Letter · Uploaded 5 Mar 2024 · 0.8
+                            MB</div>
+                    </div>
+                    <div class="cert-item-actions">
+                        <span class="badge badge-warning">Pending Review</span>
+                        <button class="btn btn-secondary btn-sm">View</button>
+                        <button class="btn btn-danger btn-sm">Delete</button>
+                    </div>
+                </div>
+
+                <div class="cert-item">
+                    <div class="cert-item-icon" style="background:rgba(245,158,11,0.12);">📙</div>
+                    <div class="cert-item-info">
+                        <div class="cert-item-name">TataMotors_Offer_Letter.jpg</div>
+                        <div class="cert-item-meta">Tata Motors · Offer Letter · Uploaded 15 Jan 2025 · 2.1 MB</div>
+                    </div>
+                    <div class="cert-item-actions">
+                        <span class="badge badge-info">Under Review</span>
+                        <button class="btn btn-secondary btn-sm">View</button>
+                        <button class="btn btn-danger btn-sm">Delete</button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/theme.js"></script>
+    <script src="js/validation.js"></script>
+    <script>
+        // ── File Upload Interactions ──────────────────────────────
+
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('certificateFile');
+        const filePreview = document.getElementById('filePreview');
+        const previewIcon = document.getElementById('previewIcon');
+        const previewName = document.getElementById('previewName');
+        const previewSize = document.getElementById('previewSize');
+        const removeBtn = document.getElementById('removeFileBtn');
+        const progressWrap = document.getElementById('uploadProgressWrap');
+        const progressFill = document.getElementById('progressFill');
+        const progressPct = document.getElementById('progressPct');
+
+        const FILE_ICONS = {
+            pdf: '📕',
+            jpg: '🖼️',
+            jpeg: '🖼️',
+            png: '🖼️',
+            docx: '📘',
+            doc: '📘',
+        };
+
+        function formatBytes(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        function showFilePreview(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            previewIcon.textContent = FILE_ICONS[ext] || '📄';
+            previewName.textContent = file.name;
+            previewSize.textContent = formatBytes(file.size);
+            filePreview.classList.add('visible');
+        }
+
+        function clearFile() {
+            fileInput.value = '';
+            filePreview.classList.remove('visible');
+            progressWrap.classList.remove('visible');
+            progressFill.style.width = '0%';
+            progressPct.textContent = '0%';
+        }
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File size exceeds 10 MB. Please choose a smaller file.');
+                    clearFile();
+                    return;
+                }
+                showFilePreview(file);
+            }
+        });
+
+        removeBtn.addEventListener('click', clearFile);
+
+        // Drag & Drop
+        uploadZone.addEventListener('dragover', e => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+
+        uploadZone.addEventListener('drop', e => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const dt = e.dataTransfer;
+            if (dt.files.length > 0) {
+                fileInput.files = dt.files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+
+        // ── Form Submit ───────────────────────────────────────────
+
+        document.getElementById('certUploadForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const internship = document.getElementById('linkedInternship').value;
+            const certType = document.getElementById('certType').value;
+            const hasFile = fileInput.files.length > 0;
+
+            let valid = true;
+
+            if (!internship) {
+                document.getElementById('linkedInternshipError').textContent = 'Please select an internship.';
+                document.getElementById('linkedInternshipError').classList.add('visible');
+                document.getElementById('linkedInternship').classList.add('error');
+                valid = false;
+            } else {
+                document.getElementById('linkedInternshipError').classList.remove('visible');
+                document.getElementById('linkedInternship').classList.remove('error');
+            }
+
+            if (!certType) {
+                document.getElementById('certTypeError').textContent = 'Please select a certificate type.';
+                document.getElementById('certTypeError').classList.add('visible');
+                document.getElementById('certType').classList.add('error');
+                valid = false;
+            } else {
+                document.getElementById('certTypeError').classList.remove('visible');
+                document.getElementById('certType').classList.remove('error');
+            }
+
+            if (!hasFile) {
+                showAlert('formAlert', 'error', 'Please select a file to upload.');
+                valid = false;
+            }
+
+            if (!valid) return;
+
+            // Simulate upload progress
+            progressWrap.classList.add('visible');
+            let pct = 0;
+            const interval = setInterval(() => {
+                pct += Math.floor(Math.random() * 15) + 5;
+                if (pct >= 100) {
+                    pct = 100;
+                    clearInterval(interval);
+                    progressFill.style.width = '100%';
+                    progressPct.textContent = '100%';
+                    setTimeout(() => {
+                        showAlert('formAlert', 'success', '✅ Certificate uploaded successfully! Faculty will review it within 1–3 working days.');
+                        progressWrap.classList.remove('visible');
+                        clearFile();
+                    }, 500);
+                } else {
+                    progressFill.style.width = pct + '%';
+                    progressPct.textContent = pct + '%';
+                }
+            }, 150);
+        });
+
+        // ── Alert helper (local, since validation.js may not expose it globally) ──
+        function showAlert(id, type, msg) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.className = 'alert alert-' + type + ' visible';
+            el.innerHTML = (type === 'success' ? '✅' : '❌') + ' ' + msg;
+            el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            if (type === 'success') setTimeout(() => el.classList.remove('visible'), 6000);
+        }
+    </script>
+</body>
+
+</html>
